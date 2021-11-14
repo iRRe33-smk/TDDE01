@@ -90,13 +90,13 @@ compare <- function(X, theta, sigma,lambda){
 for(lambda in lambdas){
   sigma <-runif(1) #Noise variance is uniformly distributed
   opt <- ridgeOpt(lambda=lambda,X=X,sigma=sigma)
-  W <- as.matrix(opt$par) #Weights
+  theta <- as.matrix(opt$par) #Weights
   X <- as.matrix(X)
   Y <- as.matrix(X[,1])
-  XW <-X %*% W
-  trainMSE <- sum( (XW - Y[,1])^2 )/dim(X)[1]
-  testMSE<-sum( (Xtest%*%W - Xtest[,1])^2 )/dim(Xtest)[1]
-  df <- compare(X=X,theta=W,sigma=sigma,lambda=lambda)
+  Xtheta <-X %*% theta
+  trainMSE <- sum( (Xtheta - Y[,1])^2 )/dim(X)[1]
+  testMSE<-sum( (Xtest%*%theta - Xtest[,1])^2 )/dim(Xtest)[1]
+  df <- compare(X=X,theta=theta,sigma=sigma,lambda=lambda)
   print(paste("Lambda:",lambda))
   print(paste("TrainMSE:",trainMSE))
   print(paste("TestMSE:",testMSE))
