@@ -17,7 +17,7 @@ test = df_scaled[-id,]
 ## TASK 2 ##
 # Assume that the motor_UPDRS is normally distribitated and
 # compute a linear regression model.
-fit1=lm('motor_UPDRS' ~ .,data=train)
+fit1=lm(motor_UPDRS ~ .,data=train)
 summary(fit1)
 pred_train = predict(fit1,train)
 pred_test = predict(fit1,test)
