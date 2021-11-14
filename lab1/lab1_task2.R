@@ -1,9 +1,9 @@
 ## TASK 1 ##
-# Read data from .csv file and add into DataFrame, remove age,sex,subject id
+# Read data from .csv file and add into DataFrame, remove age,sex,subject id, test_time
 setwd("C:/Users/Robin/Desktop/TDDE01")
 
 Dataframe=read.csv("parkinsons.csv",sep=",")
-df = data.frame(Dataframe[c(5,7:22)])
+df = data.frame(Dataframe[c(5,7:22)]) # Only use the correct voice charactheristics.
 
 # Now scale and split the data into a 60/40 ratio of train/test by sampling
 df_scaled = as.data.frame(scale(df))
@@ -35,9 +35,8 @@ mse_test = sum(diff2*diff2)/dim(test)[1]
 loglikelihood <- function(theta,Y,sigma,X){
   X <- as.matrix(X) # Convert data to matrix
   n <- length(X)[1]     # Get number of rows
-  # Assign value to sigma and square it
   loss <- sum((X%*%theta-as.matrix(Y))^2) 
-  myLoglik = 0.5*n*log(sigma)-0.5*n*log(2*pi)-sigma*loss/(2)
+  myLoglik = 0.5*n*log(sigma)-0.5*n*log(2*pi)-loss/(2*sigma)
   return (myLoglik)
 }
 
@@ -82,7 +81,7 @@ compare <- function(X, theta, sigma,lambda){
   Y <- as.matrix(X[,1])
   n <- dim(X)[1]
   logl <- loglikelihood(X=X,Y=Y, theta=theta,sigma=sigma)
-  print(logl)
+  #print(logl)
   DF <- DF_function(X=X,lambda=lambda)
   aic_value <- (2*DF - 2*logl)/n
   return(aic_value)
@@ -103,3 +102,4 @@ for(lambda in lambdas){
   print(paste("AIC:",df))
   print("-----")
 }
+# Seems we get the best combination of AIC and MSE values for lambda = 100
