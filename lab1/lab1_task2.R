@@ -19,14 +19,15 @@ test = df_scaled[-id,]
 # compute a linear regression model.
 fit1=lm(motor_UPDRS ~ .,data=train)
 summary(fit1)
-pred_train = predict(fit1,train)
-pred_test = predict(fit1,test)
-
-# Estimate prediction for training- and testdata, then calculate MSE error
-diff1 = (pred_train-train[1])
-diff2 = (pred_test-test[1])
-mse_train = sum(diff1*diff1)/dim(train)[1]
-mse_test = sum(diff2*diff2)/dim(test)[1]
+prediction_train = predict(fit1,train)
+prediction_test = predict(fit1,test)
+# Estimate prediction for training- and test data, then calculate MSE error
+diff1 = (prediction_train-train[,1])
+diff2 = (prediction_test-test[,1])
+mse_train <- sum(diff1^2)/dim(train)[1]
+mse_test = sum(diff2^2)/dim(test)[1]
+print(mse_train)
+print(mse_test)
 ## ----- Completed ----- ##
 
 ## TASK 3 ##
@@ -35,14 +36,14 @@ mse_test = sum(diff2*diff2)/dim(test)[1]
 loglikelihood <- function(theta,Y,sigma,X){
   X <- as.matrix(X) # Convert data to matrix
   n <- length(X)[1]     # Get number of rows
-  loss <- sum((X%*%theta-as.matrix(Y))^2) 
-  myLoglik = 0.5*n*log(sigma)-0.5*n*log(2*pi)-loss/(2*sigma)
+  loss <- sum( (X%*%theta-as.matrix(Y))^2 ) 
+  myLoglik = 0.5*n*log(sigma^2)-0.5*n*log(2*pi)-loss/(2*sigma^2)
   return (myLoglik)
 }
 
 # (b) RIDGE FUNCTION
 ridge_function <- function(theta,Y,sigma,lambda,X){
-# uses function from (a)
+  # uses function from (a)
   myLoglik <- loglikelihood(theta=theta,Y=Y,sigma=sigma,X=X)
   ridge <- -myLoglik + lambda*sum(theta^2)
   return(ridge)
@@ -52,7 +53,7 @@ ridge_function <- function(theta,Y,sigma,lambda,X){
 ridgeOpt <- function(lambda,X,sigma){
   X <- as.matrix(X)
   Y <- as.matrix(X[,1])   # Assign Y = motor_UPDRS
-  n <- dim(X)[2]
+  n <- dim(X)[2]  # Number of rows
   
   initTheta <- as.matrix(rnorm(n)) # Initial value for theta
   opt <- optim(par=initTheta,fn=ridge_function,lambda=lambda,sigma=sigma,Y=Y,X=as.matrix(X),method = "BFGS")
@@ -62,11 +63,11 @@ ridgeOpt <- function(lambda,X,sigma){
 DF_function <- function(X,lambda){
   # Uses function from (c) to find the Degree of Freedom of the returned solution
   X <- as.matrix(X)
-  Y <- as.matrix(X[,1])
-  n <- dim(X)[2]
+  Y <- as.matrix(X[,1]) # motor_UPDRS
+  n <- dim(X)[2]    #Number of rows
   I <- diag(n)
-  Xt <- t(X)
-  # Formula for X(X_t*X + lambda*I)*X_t*Y
+  Xt <- t(X)   #Transpose X
+  # Formula for X(X_t*X + lambda*I)^-1 * X_t*Y
   DF <- X%*%solve(Xt%*%X + lambda*I) %*% Xt %*%Y
   DF <- sum(diag(DF))
   print(paste("Degree of freedom: ",DF))
@@ -93,8 +94,8 @@ for(lambda in lambdas){
   X <- as.matrix(X)
   Y <- as.matrix(X[,1])
   XW <-X %*% W
-  trainMSE <- mean( (XW - Y[,1])^2 )
-  testMSE<-mean( (Xtest%*%W - Xtest[,1])^2 )
+  trainMSE <- sum( (XW - Y[,1])^2 )/dim(X)[1]
+  testMSE<-sum( (Xtest%*%W - Xtest[,1])^2 )/dim(Xtest)[1]
   df <- compare(X=X,theta=W,sigma=sigma,lambda=lambda)
   print(paste("Lambda:",lambda))
   print(paste("TrainMSE:",trainMSE))
@@ -102,4 +103,4 @@ for(lambda in lambdas){
   print(paste("AIC:",df))
   print("-----")
 }
-# Seems we get the best combination of AIC and MSE values for lambda = 100
+# Seems we get the best combination of AIC and MSE values for lambda = 100(0)?
