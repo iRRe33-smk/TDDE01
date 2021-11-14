@@ -3,31 +3,31 @@
 setwd("C:/Users/Robin/Desktop/TDDE01")
 
 Dataframe=read.csv("parkinsons.csv",sep=",")
-df = data.frame(Dataframe[c(5,7:22)]) # Only use the correct voice charactheristics.
+df <- data.frame(Dataframe[c(5,7:22)]) # Only use the correct voice charactheristics.
 
 # Now scale and split the data into a 60/40 ratio of train/test by sampling
-df_scaled = as.data.frame(scale(df))
-n = dim(df)[1]
+df_scaled <- as.data.frame(scale(df))
+n <- dim(df)[1]
 set.seed(12345)
-id = sample(1:n,floor(n*0.6))
-train = df_scaled[id,]
-test = df_scaled[-id,]
+id <- sample(1:n,floor(n*0.6))
+train <- df_scaled[id,]
+test <- df_scaled[-id,]
 ## ----- Completed ----- ##
 
 ## TASK 2 ##
 # Assume that the motor_UPDRS is normally distribitated and
 # compute a linear regression model.
-fit1=lm(motor_UPDRS ~ .,data=train)
+fit1 <- lm(motor_UPDRS ~ .,data=train)
 summary(fit1)
-prediction_train = predict(fit1,train)
-prediction_test = predict(fit1,test)
+prediction_train <- predict(fit1,train)
+prediction_test <- predict(fit1,test)
 # Estimate prediction for training- and test data, then calculate MSE error
-diff1 = (prediction_train-train[,1])
-diff2 = (prediction_test-test[,1])
+diff1 <- (prediction_train-train[,1])
+diff2 <- (prediction_test-test[,1])
 mse_train <- sum(diff1^2)/dim(train)[1]
-mse_test = sum(diff2^2)/dim(test)[1]
-print(mse_train)
-print(mse_test)
+mse_test <- sum(diff2^2)/dim(test)[1]
+print(paste("MSE for training data: ",mse_train))
+print(paste("MSE for test data: ", mse_test))
 ## ----- Completed ----- ##
 
 ## TASK 3 ##
@@ -37,7 +37,7 @@ loglikelihood <- function(theta,Y,sigma,X){
   X <- as.matrix(X) # Convert data to matrix
   n <- length(X)[1]     # Get number of rows
   loss <- sum( (X%*%theta-as.matrix(Y))^2 ) 
-  myLoglik = 0.5*n*log(sigma^2)-0.5*n*log(2*pi)-loss/(2*sigma^2)
+  myLoglik <- 0.5*n*log(sigma^2)-0.5*n*log(2*pi)-loss/(2*sigma^2)
   return (myLoglik)
 }
 
