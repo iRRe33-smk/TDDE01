@@ -22,8 +22,8 @@ summary(fit1)
 prediction_train <- predict(fit1,train)
 prediction_test <- predict(fit1,test)
 # Estimate prediction for training- and test data, then calculate MSE error
-diff1 <- (prediction_train-train[,1])
-diff2 <- (prediction_test-test[,1])
+diff1 <- (prediction_train-train[,'motor_UPDRS'])
+diff2 <- (prediction_test-test[,'motor_UPDRS'])
 mse_train <- sum(diff1^2)/dim(train)[1]
 mse_test <- sum(diff2^2)/dim(test)[1]
 print(paste("MSE for training data: ",mse_train))
@@ -39,7 +39,7 @@ loglikelihood <- function(theta,Y,sigma,X){
   theta<-as.matrix(theta)
 
   loss <- sum( (X%*%theta-as.matrix(Y))^2 ) 
-  myLoglik <- -n*log(sigma^2)/2 - n*log(2*pi)/2 -loss/(2*sigma^2)
+  myLoglik <- (-n*log(sigma^2)/2) - (n*log(2*pi)/2) -loss/(2*sigma^2)
   return (myLoglik)
 }
 
@@ -57,7 +57,7 @@ ridge_function <- function(theta,Y,lambda,X){
 # uses function from (b) to find the optimal theta and sigma for a given lambda
 ridgeOpt <- function(lambda,X,Y,sigma){
   X <- as.matrix(X)
-  n <- dim(X)[2]  # Number of rows
+  n <- dim(X)[2]  # Number of columns
   sigma=1
   initTheta <- matrix(0,n) # Initial value for theta
   opt <- optim(par=c(initTheta,sigma),fn=ridge_function,lambda=lambda,Y=Y,X=as.matrix(X),method = "BFGS")
@@ -68,7 +68,7 @@ DF_function <- function(X,Y,lambda){
   # Uses function from (c) to find the Degree of Freedom of the returned solution
   X <- as.matrix(X)
   Y <- as.matrix(Y) # motor_UPDRS
-  n <- dim(X)[2]    #Number of rows
+  n <- dim(X)[2]    #Number of columns
   I <- diag(n)
   Xt <- t(X)   #Transpose X
   # Formula for X(X_t*X + lambda*I)^-1 * X_t*Y
