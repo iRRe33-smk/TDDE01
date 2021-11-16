@@ -35,68 +35,74 @@ print(paste("MSE for test data: ", mse_test))
 # Returns the -Log-likelihood
 loglikelihood <- function(theta,Y,sigma,X){
   X <- as.matrix(X) # Convert data to matrix
-  n <- length(X)[1]     # Get number of rows
+  n <- dim(X)[1]     # Get number of rows
+  theta<-as.matrix(theta)
+
   loss <- sum( (X%*%theta-as.matrix(Y))^2 ) 
-  myLoglik <- 0.5*n*log(sigma^2)-0.5*n*log(2*pi)-loss/(2*sigma^2)
+  myLoglik <- -n*log(sigma^2)/2 - n*log(2*pi)/2 -loss/(2*sigma^2)
   return (myLoglik)
 }
 
 # (b) RIDGE FUNCTION
-ridge_function <- function(theta,Y,sigma,lambda,X){
+ridge_function <- function(theta,Y,lambda,X){
   # uses function from (a)
+  n<-dim(X)[2]
+  sigma<-(theta[n+1])
+  theta<-as.matrix(theta[1:n])
   myLoglik <- loglikelihood(theta=theta,Y=Y,sigma=sigma,X=X)
   ridge <- -myLoglik + lambda*sum(theta^2)
   return(ridge)
 }
 # (c) RIDGEOPT
 # uses function from (b) to find the optimal theta and sigma for a given lambda
-ridgeOpt <- function(lambda,X,sigma){
+ridgeOpt <- function(lambda,X,Y,sigma){
   X <- as.matrix(X)
-  Y <- as.matrix(X[,1])   # Assign Y = motor_UPDRS
   n <- dim(X)[2]  # Number of rows
-  
-  initTheta <- as.matrix(rnorm(n)) # Initial value for theta
-  opt <- optim(par=initTheta,fn=ridge_function,lambda=lambda,sigma=sigma,Y=Y,X=as.matrix(X),method = "BFGS")
+  sigma=1
+  initTheta <- matrix(0,n) # Initial value for theta
+  opt <- optim(par=c(initTheta,sigma),fn=ridge_function,lambda=lambda,Y=Y,X=as.matrix(X),method = "BFGS")
   return(opt)
 }
 # (d) DM
-DF_function <- function(X,lambda){
+DF_function <- function(X,Y,lambda){
   # Uses function from (c) to find the Degree of Freedom of the returned solution
   X <- as.matrix(X)
-  Y <- as.matrix(X[,1]) # motor_UPDRS
+  Y <- as.matrix(Y) # motor_UPDRS
   n <- dim(X)[2]    #Number of rows
   I <- diag(n)
   Xt <- t(X)   #Transpose X
   # Formula for X(X_t*X + lambda*I)^-1 * X_t*Y
-  DF <- X%*%solve(Xt%*%X + lambda*I) %*% Xt %*%Y
+  DF <- X%*%solve(Xt%*%X + lambda*I) %*% Xt
   DF <- sum(diag(DF))
   print(paste("Degree of freedom: ",DF))
   return(DF)
 }
 ## ----- Completed ----- ##
 # TASK 4
-lambdas <- c(1,100,1000)
-X=train
-Xtest=as.matrix(test)
-compare <- function(X, theta, sigma,lambda){
-  Y <- as.matrix(X[,1])
+#opt = ridgeOpt(lambda=100,X=X)
+compare <- function(X, theta,Y, sigma,lambda){
   n <- dim(X)[1]
-  logl <- loglikelihood(X=X,Y=Y, theta=theta,sigma=sigma)
+  logl <- loglikelihood(X=X,Y=Y,theta=theta,sigma=sigma)
   #print(logl)
-  DF <- DF_function(X=X,lambda=lambda)
-  aic_value <- (2*DF - 2*logl)/n
+  DF <- DF_function(X=X,Y=Y,lambda=lambda)
+  aic_value <- (2*DF - 2*logl)
   return(aic_value)
 }
+lambdas <- c(1,100,1000)
+Xtrain<-as.matrix(train[2:17])
+Ytrain<-as.matrix(train[1])
+Xtest=as.matrix(test[2:17])
+Ytest<-as.matrix(test[1])
+#opt = ridgeOpt(lambda=1,X=Xtrain,Y=Ytrain)
 for(lambda in lambdas){
-  sigma <-runif(1) #Noise variance is uniformly distributed
-  opt <- ridgeOpt(lambda=lambda,X=X,sigma=sigma)
-  theta <- as.matrix(opt$par) #Weights
-  X <- as.matrix(X)
-  Y <- as.matrix(X[,1])
-  Xtheta <-X %*% theta
-  trainMSE <- sum( (Xtheta - Y[,1])^2 )/dim(X)[1]
-  testMSE<-sum( (Xtest%*%theta - Xtest[,1])^2 )/dim(Xtest)[1]
-  df <- compare(X=X,theta=theta,sigma=sigma,lambda=lambda)
+#  sigma <-runif(1) #Noise variance is uniformly distributed
+  opt <- ridgeOpt(lambda=lambda,Y=Ytrain,X=Xtrain)
+  theta <- as.matrix(opt$par[1:16]) #Weights
+  sigma<- opt$par[17]
+  Xtheta <- Xtrain %*% theta
+  trainMSE <- sum( (Xtheta - Ytrain)^2 )/dim(Xtrain)[1]
+  testMSE <- sum( (Xtest%*%theta - Ytest)^2 )/dim(Xtest)[1]
+  df <- compare(X=Xtrain,Y=Ytrain,theta=theta,sigma=sigma,lambda=lambda)
   print(paste("Lambda:",lambda))
   print(paste("TrainMSE:",trainMSE))
   print(paste("TestMSE:",testMSE))
