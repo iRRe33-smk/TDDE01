@@ -1,4 +1,4 @@
-setwd("C:/Users/isakg/project_repos/tdde01-labbar/lab1")
+setwd("tdde01-labbar/lab1")
 
 df = read.csv2('pima-indians-diabetes.csv', sep=',', col.names = c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "y"))
 head(df)
@@ -64,7 +64,7 @@ missclass_error
 #colors_true = sapply(df$y,make_colors)
 
 colors_pred = sapply(ypred,make_colors)
-plot(df$x2,df$x8,col=colors_pred, xlab = "Plasma glucose levels", ylab = "Age", main = paste("Model predictions for Diabetes, Missclass_Error", toString(missclass_error), sep=" = ") ) 
+plot(df$x2,df$x8,col=colors_pred, xlab = "Plasma glucose levels", ylab = "Age", main = paste("Model predictions for Diabetes \n Missclass_Error", toString(missclass_error), sep=" = ") ) 
 # i still think this looks like a hard task. The models attempts to make a straight line to separate these the cases.
 
 
@@ -120,6 +120,7 @@ for (r in c(.2,.5,.8)){
   plot(df$x2,df$x8,col=colors_with_r, ylab = "Age", xlab= "Glucose Levels", main = paste("Model predictions for with decision boundry \n r", toString(r), sep=" == ")) 
   lines(x2,x8,col="blue")
 }
+
 
 #the model become more conservatime as R increases. r represenets the level of certainty required to predict positive.
 
