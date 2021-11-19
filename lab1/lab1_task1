@@ -26,7 +26,7 @@ for (i in key){
   missclass_error = c(1 - sum(diag(table2)/sum(table2)))
   missclass_errortr[i]<-  missclass_error
   
-  nearest2 <- kknn(as.factor(V65)~.,train=vdata, test=vdata, k=i, kernel="rectangular")
+  nearest2 <- kknn(as.factor(V65)~.,train=trdata, test=vdata, k=i, kernel="rectangular")
   table3 <- table(vdata[, 65], fitted.values(nearest2))
   missclass_error1 = c(1 - sum(diag(table3)/sum(table3)))
   missclass_errorv[i]<-  missclass_error1
