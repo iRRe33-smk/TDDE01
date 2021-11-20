@@ -40,18 +40,6 @@ for (i in order_Full){
   heatmap(numheatmaptrmax, Colv = NA, Rowv = NA, )
 }
 
-nearest <- kknn(as.factor(V65)~.,train=trdata, test=tedata, k=6, kernel="rectangular")
-table1 <- table(tedata[, 65], fitted.values(nearest))
-missclass_error = 1 - sum(diag(table1)/sum(table1))
-
-nearest1 <- kknn(as.factor(V65)~.,train=trdata, test=trdata, k=6, kernel="rectangular")
-table2 <- table(trdata[, 65], fitted.values(nearest1))
-missclass_error = 1 - sum(diag(table2)/sum(table2))
-
-nearest2 <- kknn(as.factor(V65)~.,train=trdata, test=vdata, k=6, kernel="rectangular")
-table3 <- table(vdata[, 65], fitted.values(nearest2))
-missclass_error1 = 1 - sum(diag(table3)/sum(table3))
-
 ## TASK 4 ##
 key <- c(1:30)
 missclass_errortr <- numeric(30)
@@ -67,13 +55,22 @@ for (i in key){
   table3 <- table(vdata[, 65], fitted.values(nearest2))
   missclass_error1 = c(1 - sum(diag(table3)/sum(table3)))
   missclass_errorv[i]<-  missclass_error1
-  
-  cross_entropy1 = -sum(c(1 - sum(diag(table3) * log(1e-15 + diag(table2)))))
-  cross_entropy[i] <- cross_entropy1
 }
 
 plot(key, missclass_errortr, ylab = "missclassification_error", xlab = "k", col="blue")
 points(key, missclass_errorv, col="red")
+
+nearest <- kknn(as.factor(V65)~.,train=trdata, test=tedata, k=6, kernel="rectangular")
+table1 <- table(tedata[, 65], fitted.values(nearest))
+missclass_error = 1 - sum(diag(table1)/sum(table1))
+
+nearest1 <- kknn(as.factor(V65)~.,train=trdata, test=trdata, k=6, kernel="rectangular")
+table2 <- table(trdata[, 65], fitted.values(nearest1))
+missclass_error = 1 - sum(diag(table2)/sum(table2))
+
+nearest2 <- kknn(as.factor(V65)~.,train=trdata, test=vdata, k=6, kernel="rectangular")
+table3 <- table(vdata[, 65], fitted.values(nearest2))
+missclass_error1 = 1 - sum(diag(table3)/sum(table3))
 
 ## TASK 5 ##
 
@@ -94,4 +91,12 @@ for (i in key){
 print(cross_entropy)
 plot(key,cross_entropy, ylab = "cross_entropy_error", xlab = "k", col="blue")
 plot(key,cross_entropy, col="red")
+
+sum(log(table2$prob[7,] + 1e-15))
+table2[1,1]
+
+cross_entropy1 = (c(1 - sum(diag(table3) * log(1e-15 + diag(table2)))))
+ottatrdata <- trdata$V65==8
+probottatr <- nearest1$prob[,9]
+
 
