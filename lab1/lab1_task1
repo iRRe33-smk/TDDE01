@@ -75,50 +75,34 @@ missclass_error1 = 1 - sum(diag(table3)/sum(table3))
 ## TASK 5 ##
 
 key <- c(1:30)
-bey <- c(0:9)
-cross_entropy <- numeric(30)
-
-for (i in key){
-    nearest1 <- kknn(as.factor(V65)~.,train=trdata, test=trdata, k=i, kernel="rectangular")
-    table2 <- table(trdata[, 65], fitted.values(nearest1))
-    
-    for (b in bey){
-      cross_entropy1 = sum(log(nearest1$prob[,b] + 1e-15))
-      cross_entropy[i] <- cross_entropy1
-  }
-}
-
-print(cross_entropy)
-plot(key,cross_entropy, ylab = "cross_entropy_error", xlab = "k", col="blue")
-plot(key,cross_entropy, col="red")
-
-sum(log(table2$prob[7,] + 1e-15))
-table2[1,1]
-
-cross_entropy1 = (c(1 - sum(diag(table3) * log(1e-15 + diag(table2)))))
-ottatrdata <- trdata$V65==8
-probottatr <- nearest1$prob[,9]
+digits <- c(1:10)
+train_error <- as.vector(matrix(0,ncol = 30))
+val_error <- as.vector(matrix(0,ncol = 30))
+entropy_error <- as.vector(matrix(0,ncol = 30))
 
 
 for (i in key){
   nearest1 <- kknn(as.factor(V65)~.,train=trdata, test=trdata, k=i, kernel="rectangular")
   nearest2 <- kknn(as.factor(V65)~.,train=trdata, test=vdata, k=i, kernel="rectangular")
-  temp = 0
   
   for (digit in digits){
     nu_number <- digit-1
+    number_ch <- as.character(nu_number)
     
     cross_train <- trdata$V65 == nu_number
     cross_val <- vdata$V65 == nu_number
     
-    prob_train <- nearest1$prob[cross_train,nu_number] + 1e-15
-    prob_val <- nearest2$prob[cross_val,nu_number] + 1e-15
+    prob_train <- nearest1$prob[cross_train,number_ch] + 1e-15
+    prob_val <- nearest2$prob[cross_val,number_ch] + 1e-15
     
     train_error[i] <- train_error[i] + sum(-log(prob_train))
     val_error[i] <- val_error[i] + sum(-log(prob_val))
     
     entropy_error[i] <- abs(val_error[i]-train_error[i])
-    temp <- c(temp,entropy_error[i])
   }
-  cross_entropy[i] <- sum(temp)
 }
+
+plot(key, entropy_error, ylab = "cross_entropy_error", xlab = "k", col="blue")
+which.min(entropy_error)
+
+
