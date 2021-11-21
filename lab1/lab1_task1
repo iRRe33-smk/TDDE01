@@ -80,7 +80,6 @@ train_error <- as.vector(matrix(0,ncol = 30))
 val_error <- as.vector(matrix(0,ncol = 30))
 entropy_error <- as.vector(matrix(0,ncol = 30))
 
-
 for (i in key){
   nearest1 <- kknn(as.factor(V65)~.,train=trdata, test=trdata, k=i, kernel="rectangular")
   nearest2 <- kknn(as.factor(V65)~.,train=trdata, test=vdata, k=i, kernel="rectangular")
@@ -92,11 +91,14 @@ for (i in key){
     cross_train <- trdata$V65 == nu_number
     cross_val <- vdata$V65 == nu_number
     
+    TRUE_train <- (which(cross_train, useNames = TRUE))
+    TRUE_val <- (which(cross_val, useNames = TRUE))
+    
     prob_train <- nearest1$prob[cross_train,number_ch] + 1e-15
     prob_val <- nearest2$prob[cross_val,number_ch] + 1e-15
     
-    train_error[i] <- train_error[i] + sum(-log(prob_train))
-    val_error[i] <- val_error[i] + sum(-log(prob_val))
+    train_error[i] <- train_error[i] + sum(-(TRUE_train*log(prob_train)))
+    val_error[i] <- val_error[i] + sum(-(TRUE_val*log(prob_val)))
     
     entropy_error[i] <- abs(val_error[i]-train_error[i])
   }
@@ -104,5 +106,4 @@ for (i in key){
 
 plot(key, entropy_error, ylab = "cross_entropy_error", xlab = "k", col="blue")
 which.min(entropy_error)
-
 
