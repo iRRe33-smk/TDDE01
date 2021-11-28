@@ -37,18 +37,38 @@ for (n in 1:dim(df_scaled)[2]){
   
   }
 }
-dim(df_pc_n)
+
+#plottinf first two componets
 plot(df_pc_n[,1:2], main ="Plot of first to components")
 
+
+#information densitity of base features
+total_var_features = sum(diag(var(df_scaled)))
+cumsum_var_features = cumsum(diag(var(df_scaled)))
+features_required = which(c(cumsum_var_features > 95))[1]
+features_required #96 features requiired to achieve >95 % of variance
+
+plot(cumsum_var_features, type="p",col="red", xlab = "number of used features", ylab="cumsum variance base features", main = "Cumsum variance features ", sub =paste("number of features required to achiev 95% : ", features_required),ylim =c(0,105) )
+lines(c(0,100),c(95,95),col="blue")
+lines(c(features_required,features_required),c(0,100), col="blue")
+
+
+
+
+#inofrmation density of PCA components
 total_var = sum(diag(var(df_pc_n)))
 cumsum_var = cumsum(diag(var(df_pc_n)))
+components_required = which(c(cumsum_var) > 95)[1] #35 features needed, variance above 95% of variance
 
-features_required = which(c(cumsum_var) > 95)[1] #35 features needed, variance above 95% of variance
+by_each = diag(var(df_pc_n))/total_var
+first_two = by_each[1:2]
+first_two #the two first  
 
-plot(cumsum_var, type="p",col="red", xlab = "number of used features", ylab="cumsum variance", main = "Cumsum variance ", sub =paste("number of features required to achiev 95% : ", features_required) )
+plot(cumsum_var, type="p",col="red", xlab = "number of used components", ylab="cumsum variance", main = "Cumsum variance PCA components ", sub =paste("required to achieve 95% : ", components_required),ylim =c(0,105) )
 lines(c(0,100),c(95,95),col="blue")
+lines(c(components_required,components_required),c(0,100), col="blue")
 
-lines(c(features_required,features_required),c(0,100), col="blue")
+
 
 #-------------------------- TASK 1 DONE ---------------------------
 get_RGB_colors <- function(y){
@@ -146,7 +166,7 @@ theta0 = as.matrix(theta0)
 
 
 
-sed.seed(12345)
+set.seed(12345)
 optim_res = optim(par=theta0,fn=cost_func,  X_train = X_train ,y_train = y_train,X_test=X_test, y_test=y_test,method = "BFGS", control=list(trace=TRUE))
 
 
@@ -172,18 +192,42 @@ test_min_ind = which(mse_test_vals==min(mse_test_vals))
 
 num_points = max(dim(as.matrix(filtered_train_data)))
 
-plot(filtered_train_data,xlim=c(0,num_points), ylim=c(0,1.5), col = "blue", main="MSE for train(blue) and test(red) \n Lines are lowest achieved using PCA", xlab=paste("number of iterations divided by ",num_removed),ylab="Mean Square Error")
+plot(filtered_train_data,xlim=c(0,num_points), ylim=c(0,1.5), col = "blue", main="MSE for train(blue) and test(red) \n Lines are lowest achieved using lm", xlab=paste("number of iterations divided by ",num_removed),ylab="Mean Square Error")
 points(filtered_test_data,pch=21, col="red")
 #adding linges from previous model
 lines(c(0,225),rep(df_results[1,1],2),col="blue")
 lines(c(0,225),rep(df_results[2,1],2),col="red")
 
-print(df_results)
+# print(df_results)
+
+mean(m$coefficients/c(theta_best,.019))
+
+#mean(abs(m$coefficients-c(theta_best,0)))/mean(abs(c(m$coefficients,theta_best)))
+
+iRRes_tal = mean(abs(m$coefficients-c(0,theta_best)))/mean(abs(c(m$coefficients,theta_best)))
+iRRes_tal
+
+
+plot(m$coefficients, col="red", main ="plotting coefficients against each other", ylab = "coef", xlab="feature", sub="optim-blue, lm-red")
+points(c(0,theta_best), col="blue")
 
 ##we clearly see from both graph and the df that the two methods perform the same, because they are.
 
 
-#------------------------------ TASK 4 done -------------------------------------
+#------------------------------ TASK 4 done ---------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#--------.-------     anything below is not part of assignment ------------------------ 
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------
+
+
+
 
 head(df_pc_n) ## df with pca applied
 raw_df = data.frame(read.csv("lab2/communities.csv"))
@@ -210,6 +254,8 @@ dim(df_test)
 m = lm(ViolentCrimesPerPop ~ ., df_train)
 yhat =  predict(m,df_test, type="response")
 
+plot(m$coefficients, col="red", main ="plotting coefficients against each other", ylab = "coef", xlab="feature", sub="optim-blue, PCA-lm-red")
+points(c(0,theta_best), col="blue")
 
 
 MSE_PCA_train = mean(m$residuals^2)
@@ -220,10 +266,13 @@ r2_PCA_train = 1 - sum((m$fitted.values-df_train$ViolentCrimesPerPop)^2) / sum((
 
 r2_PCA_test = 1 - sum((yhat-df_test$ViolentCrimesPerPop)^2) / sum((df_test$ViolentCrimesPerPop - rep(mean(df_test$ViolentCrimesPerPop),dim(df_test)[1]))^2) 
 
-df_results$PCA_MSE = c(MSE_PCA_train, MSE_PCA_train)
+df_results
+
+df_results$PCA_MSE = c(MSE_PCA_train, MSE_PCA_test)
 df_results$PCA_R2 = c(r2_PCA_train, r2_PCA_test)
 
 df_results
+
 
 
 
