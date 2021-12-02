@@ -1,0 +1,61 @@
+## TASK 1 ##
+
+data=read.csv("tecator.csv", header = T)
+
+df <- data.frame(data[c(2:102)])
+
+n=dim(df)[1]
+set.seed(12345)
+id <- sample(1:n, floor(n*0.5))
+
+train <- df[id,]
+test <- df[-id,]
+
+fit=lm(Fat~., data=train)
+summary(fit)
+
+prediction_train <- predict(fit,train)
+prediction_test <- predict(fit,test)
+
+diff_train <- (prediction_train -train[,"Fat"])
+diff_test <- (prediction_test -test[,"Fat"])
+
+mse_train <- sum(diff_train^2)/dim(train)[1]
+mse_test <- sum(diff_test^2)/dim(test)[1]
+
+## TASK 2 ##
+
+## TASK 3 ##
+
+y_train <- train$Fat
+x_train <- data.matrix(train[c(1:100)])
+
+library(glmnet)
+model_train <- glmnet(x_train,y_train, alpha =1, family='gaussian')
+summary(model_train)
+plot(model_train, xvar = "lambda")
+
+## TASK 4 ##
+
+model_ridge <- glmnet(x_train, y_train, alpha = 0,family='gaussian')
+plot(model_ridge, xvar = "lambda")
+
+## TASK 5 ##
+cv_model_train <- cv.glmnet(x_train,y_train, alpha =1, family='gaussian')
+best_lambda_train <- cv_model_train$lambda.min
+best_lambda_train
+
+plot(cv_model_train)
+
+model_train_best <- glmnet(x_train,y_train, alpha =1, lambda = best_lambda_train, family='gaussian')
+coef(model_train_best)
+
+y_test <- test$Fat
+x_test <- data.matrix(test[c(1:100)])
+
+y_predict <- predict(model_train_best, s = best_lambda_train, newx = x_test)
+plot(y_test, ylab = "y", col="blue")
+points(y_predict, col="red")
+
+sum((y_predict - mean(y_train))^2)/sum((y_train - mean(y_train))^2)
+sum((y_predict - y_train)^2)
