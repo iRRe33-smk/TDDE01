@@ -94,3 +94,5 @@ d <- co%*%k[1:1561]
 g<- co%*%k[1562:3122]
 l<- d + inte
 g + inte
+
+predict(filter3,spam[1:10,-58], type = "decision")
