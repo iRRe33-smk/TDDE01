@@ -73,8 +73,10 @@ rbfdot(0.05)
 f<-rbfdot(0.05)
 
 library(pracma)
+
 k<-NULL
-d<- c(1:10)
+d<-NULL
+l<-NULL
 for(i in 1:10){ # We produce predictions for just the first 10 points in the dataset.
   k2<-NULL
   for(j in 1:length(sv)){
@@ -83,16 +85,12 @@ for(i in 1:10){ # We produce predictions for just the first 10 points in the dat
     s<- f(n,k2)
     k<-c(k, s)
   }
-  d<-c(d,co%*%k)
-  #d<- co %*% k[1+(length(sv)*(i-1)):length(sv)*i]
-  #l<- c(l, d[i] + inte)
-  
-  # Your code here)
+  a<- 1 + length(sv)*(i-1)
+  z<- length(sv)*i
+  d<- co %*% k[a:z]
+  l<- c(l, d + inte)
 }
-
-d <- co%*%k[1:1561]
-g<- co%*%k[1562:3122]
-l<- d + inte
-g + inte
+l
 
 predict(filter3,spam[1:10,-58], type = "decision")
+
